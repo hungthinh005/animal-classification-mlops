@@ -1,0 +1,57 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Jupyter
+.ipynb_checkpoints
+notebooks/
+
+# Data
+data/raw/*
+data/processed/*
+
+# Models (exclude trained models from image)
+# Uncomment if you want to include models in the image
+# models/*
+
+# MLflow
+mlruns/
+mlartifacts/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+tests/
+
+# Git
+.git/
+.gitignore
+
+# Documentation
+*.md
+LICENSE
+
+# Temporary
+*.tmp
+*.bak
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+

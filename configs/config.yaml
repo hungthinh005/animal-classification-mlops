@@ -1,0 +1,116 @@
+# Animal Classification MLOps Configuration
+
+# Project settings
+project:
+  name: "animal-classification"
+  description: "Multiclass animal image classification using CNNs"
+  version: "0.1.0"
+  random_seed: 42
+
+# Data settings
+data:
+  raw_data_path: "data/raw"
+  processed_data_path: "data/processed"
+  dataset_name: "animal-image-dataset-90-different-animals"
+  num_classes: 10  # Using first 10 classes
+  class_names:
+    - "antelope"
+    - "badger"
+    - "bat"
+    - "bear"
+    - "bee"
+    - "beetle"
+    - "bison"
+    - "boar"
+    - "butterfly"
+    - "cat"
+  test_size: 0.2
+  val_size: 0.2
+  image_size: [224, 224]
+  
+# Data augmentation
+augmentation:
+  train:
+    horizontal_flip: true
+    rotation_degrees: 10
+    color_jitter:
+      brightness: 0.2
+      contrast: 0.2
+      saturation: 0.2
+    normalize: true
+  test:
+    normalize: true
+
+# Model settings
+model:
+  architecture: "resnet50"  # Options: "cnn_dual", "cnn_single", "resnet50"
+  pretrained: true
+  freeze_backbone: false
+  dropout_rate: 0.5
+
+# Training settings
+training:
+  batch_size: 32
+  epochs: 50
+  learning_rate: 0.001
+  weight_decay: 0.0001
+  num_workers: 4
+  
+  # Loss functions
+  loss:
+    classification: "cross_entropy"
+    metric_learning: "triplet_margin"
+    triplet_margin: 0.2
+    loss_weight_ce: 1.0
+    loss_weight_triplet: 1.0
+  
+  # Optimizer
+  optimizer:
+    type: "adam"
+    betas: [0.9, 0.999]
+    eps: 1.0e-08
+  
+  # Learning rate scheduler
+  scheduler:
+    type: "reduce_on_plateau"
+    mode: "min"
+    factor: 0.5
+    patience: 5
+    min_lr: 1.0e-07
+  
+  # Early stopping
+  early_stopping:
+    enabled: true
+    patience: 10
+    min_delta: 0.001
+    monitor: "val_loss"
+  
+  # Checkpointing
+  checkpoint:
+    save_best_only: true
+    monitor: "val_accuracy"
+    mode: "max"
+
+# MLflow settings
+mlflow:
+  tracking_uri: "mlruns"
+  experiment_name: "animal-classification"
+  artifact_location: "mlartifacts"
+  tags:
+    project: "animal-classification-mlops"
+    team: "ml-team"
+
+# API settings
+api:
+  host: "0.0.0.0"
+  port: 8000
+  model_path: "models/best_model.pth"
+  allowed_extensions: [".jpg", ".jpeg", ".png"]
+  max_image_size: 10485760  # 10MB in bytes
+
+# Logging
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  log_file: "logs/training.log"
+
