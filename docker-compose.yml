@@ -22,7 +22,7 @@ services:
       start_period: 40s
 
   mlflow:
-    image: ghcr.io/mlflow/mlflow:latest
+    image: python:3.9-slim
     container_name: mlflow-server
     ports:
       - "5000:5000"
@@ -30,11 +30,12 @@ services:
       - ./mlruns:/mlflow/mlruns
       - ./mlartifacts:/mlflow/mlartifacts
     command: >
+      sh -c "pip install mlflow &&
       mlflow server
       --backend-store-uri file:///mlflow/mlruns
       --default-artifact-root file:///mlflow/mlartifacts
       --host 0.0.0.0
-      --port 5000
+      --port 5000"
     restart: unless-stopped
 
 networks:

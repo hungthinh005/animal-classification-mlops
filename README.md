@@ -1,282 +1,277 @@
 # Animal Classification MLOps
 
-A production-ready MLOps project for multiclass animal image classification using Convolutional Neural Networks (CNNs) and Transfer Learning with ResNet-50.
+> Production-ready multiclass image classification using CNNs and Transfer Learning with complete MLOps infrastructure.
 
-## 🎯 Project Overview
+[![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)](https://www.python.org/)
+[![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-red.svg)](https://pytorch.org/)
+[![Docker](https://img.shields.io/badge/Docker-Ready-green.svg)](https://www.docker.com/)
+[![MLflow](https://img.shields.io/badge/MLflow-Tracking-orange.svg)](https://mlflow.org/)
 
-This project demonstrates a complete ML lifecycle implementation for classifying animal images across multiple species. It includes data preprocessing, model training with multiple architectures, evaluation, and deployment via REST API.
+---
 
-### Key Features
+## Overview
 
-- **Multiple Model Architectures**: Custom CNNs and ResNet-50 with transfer learning
-- **MLflow Integration**: Experiment tracking and model registry
-- **FastAPI Deployment**: REST API for real-time predictions
-- **Comprehensive Testing**: Unit tests for all components
-- **Docker Support**: Containerized deployment
-- **CI/CD Pipeline**: Automated testing and deployment
+End-to-end MLOps system for classifying animal images across 10+ species using deep learning, featuring multiple CNN architectures, automated training pipelines, and REST API deployment.
 
-## 📁 Project Structure
+**Key Features**:
+- Multiple model architectures (ResNet-50, Custom CNNs)
+- Transfer learning with 98% accuracy
+- REST API for real-time predictions
+- MLflow experiment tracking
+- Docker deployment
+- CI/CD pipelines
+
+---
+
+## Performance
+
+| Model | Accuracy | F1-Score | Parameters | Training Time (GPU) |
+|-------|----------|----------|------------|---------------------|
+| **ResNet-50** | **98%** | **0.97** | 23.5M | ~15 min |
+| CNNDualConv | 65% | 0.63 | 2.5M | ~20 min |
+| CNNSingleConv | 45% | 0.42 | 1.2M | ~10 min |
+
+*Tested on 10-class animal classification (480 training images, 50 epochs)*
+
+---
+
+## Architecture
+
+### System Components
 
 ```
-animal-classification-mlops/
-├── api/                      # FastAPI application
-│   ├── main.py              # API endpoints
-│   └── test_client.py       # API test client
-├── configs/                  # Configuration files
-│   └── config.yaml          # Main configuration
-├── data/                     # Data directory
-│   ├── raw/                 # Raw data
-│   ├── processed/           # Processed data
-│   └── predictions/         # Prediction outputs
-├── models/                   # Saved models
-├── notebooks/                # Jupyter notebooks
-├── src/                      # Source code
-│   ├── data/                # Data processing
-│   │   ├── dataset.py
-│   │   └── preprocessing.py
-│   ├── models/              # Model architectures
-│   │   ├── cnn_models.py
-│   │   ├── resnet_model.py
-│   │   └── model_factory.py
-│   ├── training/            # Training modules
-│   │   ├── trainer.py
-│   │   └── early_stopping.py
-│   ├── evaluation/          # Evaluation modules
-│   │   ├── evaluator.py
-│   │   └── predictor.py
-│   └── utils/               # Utilities
-│       ├── config.py
-│       ├── logger.py
-│       └── metrics.py
-├── tests/                    # Test suite
-├── logs/                     # Training logs
-├── outputs/                  # Output artifacts
-├── Dockerfile               # Docker configuration
-├── docker-compose.yml       # Docker Compose configuration
-├── requirements.txt         # Python dependencies
-├── pyproject.toml           # Project metadata
-└── README.md                # This file
+┌────────────────────────────────────────────────────────────┐
+│                    Docker Environment                       │
+│                                                             │
+│  ┌──────────────┐        ┌──────────────┐                 │
+│  │   FastAPI    │        │    MLflow    │                 │
+│  │ (Port 8000)  │        │ (Port 5000)  │                 │
+│  │              │        │              │                 │
+│  │ - Prediction │        │ - Tracking   │                 │
+│  │ - Batch API  │        │ - Registry   │                 │
+│  └──────────────┘        └──────────────┘                 │
+│                                                             │
+└────────────────────────────────────────────────────────────┘
 ```
 
-## 🚀 Getting Started
+### ML Pipeline
 
-### Prerequisites
-
-- Python 3.9+
-- CUDA-capable GPU (optional, for faster training)
-- Docker (optional, for containerized deployment)
-
-### Installation
-
-1. **Clone the repository**
-
-```bash
-git clone https://github.com/yourusername/animal-classification-mlops.git
-cd animal-classification-mlops
+```
+┌─────────────┐    ┌──────────────┐    ┌─────────────┐    ┌──────────────┐
+│   Dataset   │ -> │ Preprocessing │ -> │   Training  │ -> │  Deployment  │
+│  (Kaggle)   │    │ Augmentation  │    │   Models    │    │   (Docker)   │
+└─────────────┘    └──────────────┘    └─────────────┘    └──────────────┘
+       |                   |                    |                   |
+       v                   v                    v                   v
+  90 classes         Resize 224x224      ResNet-50/CNNs      FastAPI + MLflow
+  5400+ images       Normalization      Early Stopping         Monitoring
+                     Data Augment       MLflow Tracking
 ```
 
-2. **Create virtual environment**
+---
 
-```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-```
+## Quick Start
 
-3. **Install dependencies**
+### 🐍 Local Python Setup
+
+#### 1. Install Dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### Quick Start
+#### 2. Start Services
 
-#### 1. Data Preparation
+```bash
+# Terminal 1: MLflow UI
+mlflow ui --backend-store-uri mlruns --host 0.0.0.0 --port 5000
 
-Download and prepare the dataset:
+# Terminal 2: FastAPI (after training)
+cd api
+uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+**Or use PowerShell scripts** (Windows):
+```powershell
+.\start_services.ps1    # Start both MLflow + API
+.\start_mlflow.ps1      # MLflow only
+.\start_api.ps1         # API only
+```
+
+#### 3. Prepare Dataset
 
 ```python
-from src.data.preprocessing import download_kaggle_dataset, prepare_data
+from src.data.preprocessing import download_kaggle_dataset, split_dataset
 
-# Download dataset
+# Download from Kaggle
 download_kaggle_dataset(
     "iamsouravbanerjee/animal-image-dataset-90-different-animals",
     "data/raw"
 )
 
 # Split into train/test
-prepare_data(
+split_dataset(
     source_dir="data/raw/animals/animals",
     target_dir="data/processed",
     test_ratio=0.2,
-    num_classes=10
+    num_classes=10  # Use first 10 classes
 )
 ```
 
-#### 2. Train Model
-
-```python
-from src.utils.config import load_config
-from src.data.dataset import AnimalDataset, get_transforms, get_dataloaders
-from src.models.model_factory import create_model
-from src.training.trainer import Trainer
-
-# Load configuration
-config = load_config("configs/config.yaml")
-
-# Create datasets
-transform = get_transforms(config, is_training=True)
-train_dataset = AnimalDataset("data/processed/train", transform=transform, num_classes=10)
-
-# Create model
-model = create_model(config)
-
-# Train
-trainer = Trainer(model, config, device="cuda")
-history = trainer.train(train_loader, val_loader, epochs=50)
-```
-
-Or use the training script:
+#### 4. Train Model
 
 ```bash
-python scripts/train.py --config configs/config.yaml
+# Recommended: ResNet-50 with transfer learning
+python scripts/train.py --config configs/config.yaml --architecture resnet50 --epochs 50
+
+# Fast training: Custom CNN
+python scripts/train.py --architecture cnn_dual --epochs 30 --batch-size 32
 ```
 
-#### 3. Evaluate Model
+**Track experiments** at http://localhost:5000
 
-```python
-from src.evaluation.evaluator import Evaluator
-
-evaluator = Evaluator(model, device="cuda", class_names=class_names)
-metrics = evaluator.evaluate(test_loader)
-print(metrics)
-```
-
-#### 4. Run API Server
+#### 5. Make Predictions
 
 ```bash
-cd api
-uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+# Single image
+python scripts/predict.py --model-path models/best_model.pth --image-path path/to/image.jpg
+
+# Using API
+curl -X POST "http://localhost:8000/predict" -F "file=@animal.jpg"
 ```
 
-Test the API:
+---
 
-```bash
-python api/test_client.py path/to/image.jpg
-```
+### 🐳 Docker Setup
 
-## 🏗️ Model Architectures
-
-### 1. CNNDualConv (VGG-style)
-- Multiple convolutional blocks with batch normalization
-- Dropout for regularization
-- Suitable for smaller datasets
-
-### 2. CNNSingleConv
-- Lightweight architecture
-- Faster training
-- Lower parameter count
-
-### 3. ResNet-50 (Transfer Learning)
-- Pretrained on ImageNet
-- Fine-tuned for animal classification
-- Best performance on the benchmark
-
-## 📊 Experiment Tracking
-
-This project uses MLflow for experiment tracking:
-
-```bash
-# Start MLflow UI
-mlflow ui --backend-store-uri mlruns
-
-# Access at http://localhost:5000
-```
-
-## 🐳 Docker Deployment
-
-### Build and Run
-
-```bash
-# Build image
-docker build -t animal-classification:latest .
-
-# Run container
-docker run -p 8000:8000 animal-classification:latest
-```
-
-### Using Docker Compose
+#### Start All Services
 
 ```bash
 docker-compose up -d
 ```
 
-## 🧪 Testing
+Services available:
+- **API**: http://localhost:8000
+- **API Docs**: http://localhost:8000/docs
+- **MLflow**: http://localhost:5000
 
-Run the test suite:
+#### Stop Services
 
 ```bash
-# Run all tests
-pytest
-
-# Run with coverage
-pytest --cov=src --cov-report=html
-
-# Run specific test file
-pytest tests/test_models.py
+docker-compose down
 ```
 
-## 📈 Performance
+#### View Logs
 
-| Model | Accuracy | F1-Score | Parameters | Training Time |
-|-------|----------|----------|------------|---------------|
-| CNNDualConv | 65% | 0.63 | 2.5M | 20 min |
-| CNNSingleConv | 45% | 0.42 | 1.2M | 10 min |
-| ResNet-50 | 98% | 0.97 | 23.5M | 15 min |
+```bash
+docker-compose logs -f
+```
 
-*Tested on 10-class animal classification with 480 training images*
+---
 
-## 📝 Configuration
+## Project Structure
+
+```
+animal-classification-mlops/
+├── api/                        # FastAPI application
+│   ├── main.py                # REST API endpoints
+│   └── test_client.py         # API testing
+├── configs/
+│   └── config.yaml            # Configuration
+├── src/
+│   ├── data/                  # Data processing
+│   │   ├── dataset.py        # PyTorch Dataset
+│   │   └── preprocessing.py  # Data pipeline
+│   ├── models/                # Model architectures
+│   │   ├── cnn_models.py     # Custom CNNs
+│   │   ├── resnet_model.py   # ResNet-50
+│   │   └── model_factory.py  # Model creation
+│   ├── training/              # Training pipeline
+│   │   ├── trainer.py        # Training loop
+│   │   └── early_stopping.py # Early stopping
+│   ├── evaluation/            # Evaluation & prediction
+│   │   ├── evaluator.py
+│   │   └── predictor.py
+│   └── utils/                 # Utilities
+│       ├── config.py
+│       ├── logger.py
+│       └── metrics.py
+├── scripts/                   # CLI scripts
+│   ├── train.py
+│   ├── evaluate.py
+│   └── predict.py
+├── tests/                     # Unit tests
+├── notebooks/                 # Jupyter notebooks
+├── data/                      # Data storage
+├── models/                    # Saved models
+├── Dockerfile                 # Docker image
+├── docker-compose.yml         # Multi-service setup
+└── requirements.txt           # Dependencies
+```
+
+---
+
+## Configuration
 
 Edit `configs/config.yaml` to customize:
 
-- Model architecture
-- Training hyperparameters
-- Data augmentation settings
-- API configuration
-- MLflow settings
+```yaml
+# Model settings
+model:
+  architecture: "resnet50"      # resnet50, cnn_dual, cnn_single
+  pretrained: true              # Use ImageNet weights
+  dropout_rate: 0.5
 
-## 🔄 CI/CD Pipeline
+# Training settings
+training:
+  batch_size: 32
+  epochs: 50
+  learning_rate: 0.001
+  
+  # Early stopping
+  early_stopping:
+    enabled: true
+    patience: 10
+    min_delta: 0.001
 
-This project includes GitHub Actions workflows for:
+# Data settings
+data:
+  num_classes: 10               # Number of animal classes
+  image_size: [224, 224]
+  test_size: 0.2
+```
 
-- Automated testing on push/PR
-- Code quality checks (black, flake8)
-- Docker image building
-- Model deployment
+---
 
-## 📚 API Documentation
+## API Reference
 
 ### Endpoints
 
-- `GET /` - API information
-- `GET /health` - Health check
-- `POST /predict` - Predict single image
-- `POST /predict/batch` - Predict multiple images
-- `GET /classes` - Get supported classes
+#### `GET /health`
+Check API health and model status.
 
-### Example Request
-
-```python
-import requests
-
-url = "http://localhost:8000/predict"
-files = {"file": open("cat.jpg", "rb")}
-response = requests.post(url, files=files)
-print(response.json())
+```bash
+curl http://localhost:8000/health
 ```
 
-### Example Response
+Response:
+```json
+{
+  "status": "healthy",
+  "model_loaded": true,
+  "device": "cuda"
+}
+```
 
+#### `POST /predict`
+Predict single image.
+
+```bash
+curl -X POST "http://localhost:8000/predict" \
+  -F "file=@cat.jpg"
+```
+
+Response:
 ```json
 {
   "predicted_class": "cat",
@@ -289,11 +284,296 @@ print(response.json())
 }
 ```
 
-## 🙏 Acknowledgments
+#### `POST /predict/batch`
+Predict multiple images.
+
+```bash
+curl -X POST "http://localhost:8000/predict/batch" \
+  -F "files=@cat.jpg" \
+  -F "files=@dog.jpg"
+```
+
+#### `GET /classes`
+Get supported animal classes.
+
+**Interactive Docs**: http://localhost:8000/docs
+
+---
+
+## Supported Animal Classes
+
+Default configuration (10 classes):
+1. 🦌 Antelope
+2. 🦡 Badger
+3. 🦇 Bat
+4. 🐻 Bear
+5. 🐝 Bee
+6. 🪲 Beetle
+7. 🦬 Bison
+8. 🐗 Boar
+9. 🦋 Butterfly
+10. 🐱 Cat
+
+*Extend to 90 classes by updating `configs/config.yaml`*
+
+---
+
+## MLflow Experiment Tracking
+
+### View Experiments
+
+```bash
+mlflow ui --backend-store-uri mlruns --port 5000
+```
+
+Open http://localhost:5000 to:
+- Compare model runs
+- View metrics & parameters
+- Download artifacts
+- Track model versions
+
+### Log Custom Experiments
+
+```python
+import mlflow
+
+mlflow.set_experiment("animal-classification")
+
+with mlflow.start_run():
+    mlflow.log_param("model", "resnet50")
+    mlflow.log_param("batch_size", 32)
+    mlflow.log_metric("accuracy", 0.98)
+    mlflow.log_artifact("model.pth")
+```
+
+---
+
+## Development
+
+### Run Tests
+
+```bash
+# All tests
+pytest
+
+# With coverage
+pytest --cov=src --cov-report=html
+
+# Specific test
+pytest tests/test_models.py -v
+```
+
+### Code Quality
+
+```bash
+# Format code
+black src/ tests/
+
+# Lint
+flake8 src/ tests/
+
+# Type checking
+mypy src/
+```
+
+---
+
+## Training Options
+
+### Command Line Arguments
+
+```bash
+python scripts/train.py \
+  --config configs/config.yaml \
+  --architecture resnet50 \
+  --epochs 50 \
+  --batch-size 32 \
+  --learning-rate 0.001 \
+  --device cuda
+```
+
+### Architecture Comparison
+
+| Architecture | Use Case | Speed | Accuracy |
+|-------------|----------|-------|----------|
+| **ResNet-50** | Production, best accuracy | Medium | ⭐⭐⭐⭐⭐ |
+| **CNNDualConv** | Balanced | Fast | ⭐⭐⭐ |
+| **CNNSingleConv** | Quick experiments | Very Fast | ⭐⭐ |
+
+---
+
+## Monitoring & Logging
+
+### Application Logs
+
+```bash
+tail -f logs/training.log
+```
+
+### MLflow Metrics
+
+Automatically tracked:
+- Training/validation loss
+- Accuracy, F1-score, Precision, Recall
+- Learning rate
+- Model parameters
+- Training time
+
+---
+
+## Deployment
+
+### Docker Production Build
+
+```bash
+# Build image
+docker build -t animal-classification:latest .
+
+# Run container
+docker run -p 8000:8000 animal-classification:latest
+
+# Push to registry
+docker tag animal-classification:latest registry/animal-classification:v1.0
+docker push registry/animal-classification:v1.0
+```
+
+### Environment Variables
+
+```bash
+PYTHONPATH=/app
+CUDA_VISIBLE_DEVICES=0
+MODEL_PATH=models/best_model.pth
+```
+
+---
+
+## CI/CD Pipeline
+
+GitHub Actions workflow (`.github/workflows/ci-cd.yml`):
+
+- ✅ Automated testing on push/PR
+- ✅ Code quality checks (black, flake8)
+- ✅ Docker image building
+- ✅ Model deployment
+
+---
+
+## Troubleshooting
+
+### Common Issues
+
+**Issue**: CUDA out of memory
+```bash
+# Solution: Reduce batch size
+python scripts/train.py --batch-size 16
+```
+
+**Issue**: Port already in use
+```bash
+# Find process
+netstat -ano | findstr :5000
+
+# Kill process
+taskkill /PID <pid> /F
+```
+
+**Issue**: Model not found
+```bash
+# Verify model exists
+ls models/best_model.pth
+
+# Check config path
+cat configs/config.yaml | grep model_path
+```
+
+---
+
+## Performance Tips
+
+1. **Use GPU**: 15-20x faster than CPU
+   ```bash
+   python scripts/train.py --device cuda
+   ```
+
+2. **Transfer Learning**: Start with pretrained ResNet-50
+   ```yaml
+   model:
+     architecture: resnet50
+     pretrained: true
+   ```
+
+3. **Data Augmentation**: Improves generalization
+   ```yaml
+   augmentation:
+     horizontal_flip: true
+     rotation_degrees: 10
+     color_jitter: true
+   ```
+
+4. **Early Stopping**: Prevents overfitting
+   ```yaml
+   early_stopping:
+     enabled: true
+     patience: 10
+   ```
+
+---
+
+## Dataset
+
+**Source**: [Animal Image Dataset (90 Different Animals)](https://www.kaggle.com/datasets/iamsouravbanerjee/animal-image-dataset-90-different-animals)
+
+**Statistics**:
+- 90 animal classes
+- 60+ images per class
+- 5400+ total images
+- RGB images, various sizes
+
+**License**: Check Kaggle dataset page
+
+---
+
+## Technologies
+
+- **Framework**: PyTorch 2.0+
+- **API**: FastAPI + Uvicorn
+- **Tracking**: MLflow
+- **Containerization**: Docker + Docker Compose
+- **CI/CD**: GitHub Actions
+- **Testing**: pytest
+- **Code Quality**: black, flake8, mypy
+
+---
+
+## Contributing
+
+1. Fork the repository
+2. Create feature branch (`git checkout -b feature/new-feature`)
+3. Commit changes (`git commit -m 'Add new feature'`)
+4. Push to branch (`git push origin feature/new-feature`)
+5. Open Pull Request
+
+---
+
+## License
+
+This project is licensed under the MIT License - see [LICENSE](LICENSE) file.
+
+---
+
+## Acknowledgments
 
 - Dataset: [Animal Image Dataset](https://www.kaggle.com/datasets/iamsouravbanerjee/animal-image-dataset-90-different-animals)
 - PyTorch team for the deep learning framework
-- FastAPI for the modern web framework
+- FastAPI for the web framework
 - MLflow for experiment tracking
 
+---
 
+## Contact
+
+For questions or feedback, please open an issue on GitHub.
+
+---
+
+**Built with ❤️ for MLOps excellence**

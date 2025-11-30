@@ -69,8 +69,9 @@ CHECK_*.py
 *_SETUP*.md
 *_SOLUTION*.md
 *_INSTRUCTIONS*.md
-QUICK_START*.md
 INSTALL_*.md
+QUICK*.md
+STATUS*.md
 
 # OS
 .DS_Store
