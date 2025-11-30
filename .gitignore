@@ -25,6 +25,7 @@ ENV/
 # Jupyter
 .ipynb_checkpoints
 *.ipynb
+!notebooks/*.ipynb
 
 # Data (tracked by DVC)
 data/raw/*
